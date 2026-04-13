@@ -1,0 +1,110 @@
+<!-- src/app/pages/usuarios/usuarios.component.html -->
+
+<div class="usuarios-page">
+
+  <!-- ── BARRA SUPERIOR ──────────────────────── -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <h1>🗃️ Gestión de Usuarios</h1>
+      <span class="bd-badge">logindatabase</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="usuario-info">👤 {{ usuarioActual?.username }}</span>
+      <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- ── CONTENIDO ────────────────────────────── -->
+  <div class="content">
+
+    <!-- Mensajes de éxito/error -->
+    <div class="alert-success" *ngIf="exitoMsg">{{ exitoMsg }}</div>
+    <div class="alert-error"   *ngIf="errorMsg && !mostrarModal">{{ errorMsg }}</div>
+
+    <!-- Acciones -->
+    <div class="acciones">
+      <div class="info-tabla">
+        <strong>Tabla: login</strong>
+        <span *ngIf="!cargando"> · {{ usuarios.length }} registros</span>
+      </div>
+      <button class="btn-agregar" (click)="abrirAgregar()">+ Agregar usuario</button>
+    </div>
+
+    <!-- Cargando -->
+    <div class="loading" *ngIf="cargando && !mostrarModal">
+      ⏳ Cargando usuarios....
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="tabla-container" *ngIf="!cargando">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>lduser</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td><span class="id-badge">{{ u.login_id }}</span></td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.lduser ?? "—" }}</td>
+            <td>
+              <button class="btn-editar" (click)="abrirEditar(u)">✏️ Editar</button>
+            </td>
+          </tr>
+          <tr *ngIf="usuarios.length === 0">
+            <td colspan="4" class="sin-datos">No hay usuarios registrados</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── MODAL: AGREGAR / EDITAR ──────────────── -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>{{ modoEdicion ? "✏️ Editar usuario" : "➕ Agregar usuario" }}</h2>
+        <button class="btn-cerrar" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <form [formGroup]="usuarioForm" (ngSubmit)="guardar()" class="modal-form">
+
+        <div class="form-group">
+          <label>👤 Username</label>
+          <input type="text" formControlName="username" placeholder="Nombre de usuario">
+          <span class="error-msg" *ngIf="f['username'].touched && f['username'].invalid">
+            Mínimo 3 caracteres
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>🔑 Password {{ modoEdicion ? "(dejar vacío = sin cambios)" : "" }}</label>
+          <input type="password" formControlName="password" placeholder="Contraseña">
+          <span class="error-msg" *ngIf="f['password'].touched && f['password'].invalid">
+            Mínimo 3 caracteres
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>🔢 lduser (opcional)</label>
+          <input type="number" formControlName="lduser" placeholder="0">
+        </div>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-guardar" [disabled]="cargando">
+            {{ modoEdicion ? "Actualizar" : "Agregar" }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
